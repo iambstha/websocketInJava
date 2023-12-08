@@ -16,15 +16,13 @@ import lombok.Setter;
 public class Sensor {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(name = "device_id")
 	private String deviceId;
-	
+
 	@Column(name = "sensor_data")
-	private Double sensorData;
-	
-	
-	
+	private Integer sensorData;
+
 }
