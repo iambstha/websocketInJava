@@ -13,28 +13,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class MyWebSocketHandler extends TextWebSocketHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MyWebSocketHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(MyWebSocketHandler.class);
 
-    @Override
-    protected void handleTextMessage(WebSocketSession webSocketSession, TextMessage message) throws Exception {
-    	ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            String payload = new String(message.asBytes());
+	@Override
+	protected void handleTextMessage(WebSocketSession webSocketSession, TextMessage message) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			String payload = new String(message.asBytes());
+			JsonNode jsonNode = objectMapper.readTree(payload);
 
-            // Parse the received JSON data
-            JsonNode jsonNode = objectMapper.readTree(payload);
-            
+			String sensorType = jsonNode.get("sensorType").asText();
+			int sensorValue = jsonNode.get("sensorValue").asInt();
 
-            String sensorType = jsonNode.get("sensorType").asText();
-            int sensorValue = jsonNode.get("sensorValue").asInt();
+			logger.info("sensorType: {}, sensorValue: {}", sensorType, sensorValue);
 
-            logger.info("sensorType: {}, sensorValue: {}", sensorType, sensorValue);
-
-
-
-        } catch (Exception e) {
-            logger.error("Exception during message handling", e);
-        }
-    }
+		} catch (Exception e) {
+			logger.error("Exception during message handling", e);
+		}
+	}
 
 }
