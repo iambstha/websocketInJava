@@ -11,7 +11,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.websocketL.websocket.entity.Sensor;
-import com.websocketL.websocket.repository.WebSocketRepository;
+import com.websocketL.websocket.repository.SensorRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +24,7 @@ import lombok.Setter;
 public class MyWebSocketHandler extends TextWebSocketHandler {
 
 	@Autowired
-	private WebSocketRepository webSocketRepository;
+	private SensorRepository sensorRepository;
 
 	private static final Logger logger = LoggerFactory.getLogger(MyWebSocketHandler.class);
 
@@ -42,7 +42,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
 				Sensor sensor = new Sensor();
 				sensor.setDeviceId(sensorId);
 				sensor.setSensorData(sensorData);
-				webSocketRepository.save(sensor);
+				sensorRepository.save(sensor);
 				logger.info("device_id: {}, sensor_data: {}", sensorId, sensorData);
 			} else {
 				logger.warn("Missing or null values in JSON payload");

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.websocketL.websocket.entity.Sensor;
 
 @Repository
-public interface WebSocketRepository extends JpaRepository<Sensor, Long> {
+public interface SensorRepository extends JpaRepository<Sensor, Long> {
 
 }

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @Controller
 @CrossOrigin("*")
-public class WebsocketController {
+public class WebSocketController {
 
 	@MessageMapping("/send-message")
 	@SendTo("/topic/receive-message")
