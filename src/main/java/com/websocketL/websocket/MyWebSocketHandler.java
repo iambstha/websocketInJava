@@ -1,5 +1,7 @@
 package com.websocketL.websocket;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.websocketL.websocket.entity.Sensor;
@@ -29,7 +32,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
 	private static final Logger logger = LoggerFactory.getLogger(MyWebSocketHandler.class);
 
 	@Override
-	protected void handleTextMessage(WebSocketSession webSocketSession, TextMessage message) throws Exception {
+	protected void handleTextMessage(WebSocketSession webSocketSession, TextMessage message) throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			String payload = new String(message.asBytes());
@@ -38,19 +41,32 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
 			if (jsonNode != null && jsonNode.has("sensor_id") && jsonNode.has("sensor_data")) {
 				String sensorId = jsonNode.get("sensor_id").asText();
 				int sensorData = jsonNode.get("sensor_data").asInt();
+				try {
+					Sensor sensor = new Sensor();
+					sensor.setDeviceId(sensorId);
+					sensor.setSensorData(sensorData);
+					sensorRepository.save(sensor);
+				} catch (Exception e) {
+					logger.error("Error saving sensor data to the database", e);
+				}
 
-				Sensor sensor = new Sensor();
-				sensor.setDeviceId(sensorId);
-				sensor.setSensorData(sensorData);
-				sensorRepository.save(sensor);
-				logger.info("device_id: {}, sensor_data: {}", sensorId, sensorData);
+				logger.info("Received sensor data: device_id={}, sensor_data={}", sensorId, sensorData);
+				webSocketSession.sendMessage(new TextMessage("Message received and processed"));
+
 			} else {
 				logger.warn("Missing or null values in JSON payload");
+				webSocketSession.sendMessage(new TextMessage("Invalid JSON payload"));
 			}
 
+		} catch (JsonProcessingException e) {
+			logger.error("Error parsing JSON", e);
+			webSocketSession.sendMessage(new TextMessage("Error parsing JSON"));
+		} catch (IOException e) {
+			logger.error("Error sending message", e);
+			webSocketSession.sendMessage(new TextMessage("Error sending message"));
 		} catch (Exception e) {
-			logger.error("Exception during message handling", e);
+			logger.error("Unhandled exception during message handling", e);
+			webSocketSession.sendMessage(new TextMessage("Error processing the message"));
 		}
 	}
-
 }
